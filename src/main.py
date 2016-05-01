@@ -26,7 +26,7 @@ DEFAULT_SETTINGS = {
     "active_index": 0,
     "position": 0.0,
     "duration": 0.0,
-    "sleep_timeout": 60.0,
+    "sleep_timeout": 600.0,
     "books": {},
 }
 
@@ -239,6 +239,9 @@ class AudiobookApp(App):
             fullpath = os.path.join(path, self.active_file)
             self.load_file(fullpath)
             self.goto("play")
+        elif not self.books:
+            self.goto("library")
+            self.show_load()
 
         Clock.schedule_interval(self.update, 0.2)
 
@@ -266,7 +269,7 @@ class AudiobookApp(App):
 
     def show_load(self):
         content = LoadDialog(load=self.on_load, cancel=self.dismiss_popup)
-        self.popup = Popup(title="Select folder", content=content,
+        self.popup = Popup(title="Select folder to scan", content=content,
                            size_hint=(0.9, 0.9))
         self.popup.open()
 
@@ -305,11 +308,12 @@ class AudiobookApp(App):
         if not self.skip_position_updates:
             self.update_position()
 
-        self.file_label = "File {index} / {total}: {name}".format(
-            index=self.active_index + 1,
-            total=len(self.books[self.active_book]["files"]),
-            name=self.active_file
-        )
+        if self.active_book:
+            self.file_label = "File {index} / {total}: {name}".format(
+                index=self.active_index + 1,
+                total=len(self.books[self.active_book]["files"]),
+                name=self.active_file
+            )
 
     def update_sleep(self):
         if self.playing:
