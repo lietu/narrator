@@ -2,6 +2,8 @@
 
 Free open source cross-platform audiobook player software.
 
+![Screenshot](playing.png?raw=true "Playing screen")
+
 
 ## Development
 

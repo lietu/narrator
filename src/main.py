@@ -10,7 +10,8 @@ from kivy.uix.screenmanager import ScreenManager, Screen, \
     WipeTransition as Transition
 from kivy.uix.listview import ListItemButton, ListView
 from kivy.factory import Factory
-from kivy.properties import ObjectProperty, NumericProperty, ListProperty
+from kivy.properties import ObjectProperty, NumericProperty, ListProperty, \
+    StringProperty
 from kivy.uix.popup import Popup
 from kivy.core.audio import SoundLoader
 from kivy.clock import Clock
@@ -26,7 +27,7 @@ DEFAULT_SETTINGS = {
     "active_index": 0,
     "position": 0.0,
     "duration": 0.0,
-    "sleep_timeout": 600.0,
+    "sleep_timeout": 60.0 * 30,
     "books": {},
 }
 
@@ -179,7 +180,9 @@ class PlayScreen(Screen):
         app.skip_position_updates = False
 
 
-class AudiobookApp(App):
+class NarratorApp(App):
+    title = StringProperty("Narrator audiobook player")
+
     # Settings
     active_book = ObjectProperty("Animal farm")
     active_file = ObjectProperty("")
@@ -569,5 +572,5 @@ Factory.register('BookList', cls=BookList)
 Factory.register('BookButton', cls=BookButton)
 
 if __name__ == '__main__':
-    app = AudiobookApp()
+    app = NarratorApp()
     app.run()
