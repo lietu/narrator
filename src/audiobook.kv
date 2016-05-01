@@ -1,0 +1,266 @@
+#:kivy 1.1.0
+#: import ListAdapter kivy.adapters.listadapter.ListAdapter
+#: import BookButton main.BookButton
+
+Root:
+    orientation: "vertical"
+    LibraryScreen:
+    PlayScreen:
+    SettingsScreen:
+    AboutScreen:
+
+<PlayScreen>:
+    name: "play"
+    BoxLayout:
+        orientation: "vertical"
+
+        BoxLayout:
+            orientation: "vertical"
+
+            Label:
+                text: app.active_book
+                font_size: 24
+
+            BoxLayout:
+                orientation: "vertical"
+                size_hint_y: None
+                height: 72
+                Label:
+                    text: app.file_label
+
+                Slider:
+                    size_hint_y: None
+                    height: 48
+                    min: 0
+                    max: app.duration
+                    value: 0
+
+                BoxLayout:
+                    size_hint_y: None
+                    height: 12
+
+                    AnchorLayout:
+                        size_hint_x: None
+                        width: 50
+                        anchor_x: "left"
+                        anchor_y: "top"
+                        Label:
+                            text: app.position_text
+
+                    BoxLayout:
+                        size_hint_y: None
+
+                    AnchorLayout:
+                        size_hint_x: None
+                        width: 50
+                        anchor_x: "right"
+                        anchor_y: "top"
+                        Label:
+                            text: app.duration_text
+
+            BoxLayout:
+                size_hint_y: None
+                height: 64
+                orientation: "horizontal"
+
+                IconButton:
+                    on_release: app.prev_file()
+                    source: app.icon_prev
+                    y: self.parent.y
+                    x: self.parent.x
+                    size: 64, 64
+
+                IconButton:
+                    on_release: app.pause_play()
+                    source: app.icon_play_pause
+                    y: self.parent.y
+                    x: self.parent.x
+                    size: 64, 64
+
+                IconButton:
+                    on_release: app.next_file()
+                    source: app.icon_next
+                    y: self.parent.y
+                    x: self.parent.x
+                    size: 64, 64
+
+            BoxLayout:
+                size_hint_y: None
+                height: 64
+                orientation: "horizontal"
+
+                IconButton:
+                    on_release: app.seek_backward(30)
+                    source: app.icon_r30
+                    y: self.parent.y
+                    x: self.parent.x
+                    size: 64, 64
+
+                IconButton:
+                    on_release: app.seek_backward(10)
+                    source: app.icon_r10
+                    y: self.parent.y
+                    x: self.parent.x
+                    size: 64, 64
+
+                IconButton:
+                    on_release: app.seek_forward(10)
+                    source: app.icon_f10
+                    y: self.parent.y
+                    x: self.parent.x
+                    size: 64, 64
+
+                IconButton:
+                    on_release: app.seek_forward(30)
+                    source: app.icon_f30
+                    y: self.parent.y
+                    x: self.parent.x
+                    size: 64, 64
+
+            BoxLayout:
+                size_hint_x: None
+
+            BoxLayout:
+                size_hint_y: None
+                height: 64
+                orientation: "horizontal"
+
+                Image:
+                    size_hint_x: None
+                    width: 64
+                    source: app.icon_snooze
+
+                Label:
+                    size_hint_x: None
+                    width: 256
+                    text: app.sleep_text
+
+                BoxLayout:
+                    size_hint_y: None
+
+        Menu:
+            size_hint_y: None
+            height: 64
+
+<SettingsScreen>:
+    name: "settings"
+    BoxLayout:
+        orientation: "vertical"
+        Label:
+            text: "Settings"
+        Menu:
+            size_hint_y: None
+            height: 64
+
+<BookButton>:
+    size_hint_y: None
+    height: 32
+    on_press: app.select_book(*args)
+
+<BookList>:
+    adapter:
+        ListAdapter(data=app.book_list,
+        selection_mode="single",
+        allow_empty_selection=True,
+        cls=BookButton)
+
+<LibraryScreen>:
+    name: "library"
+    BoxLayout:
+        orientation: "vertical"
+        Label:
+            text: "Library"
+            font_size: 24
+            size_hint_y: None
+            height: 48
+
+        BookList:
+
+        BoxLayout:
+            orientation: "horizontal"
+            size_hint_y: None
+            height: 64
+
+            IconButton:
+                source: app.icon_search
+                on_release: app.show_load()
+            Button:
+                text: "Scan for new books"
+                on_release: app.show_load()
+
+        Menu:
+            size_hint_y: None
+            height: 64
+
+
+<AboutScreen>:
+    name: "about"
+    BoxLayout:
+        orientation: "vertical"
+        Label:
+            text: "About"
+        Menu:
+            size_hint_y: None
+            height: 64
+
+
+<Menu>:
+    orientation: "horizontal"
+    size_hint_y: None
+    size_hint_x: 1
+    height: 64
+
+    IconButton:
+        text: "Library"
+        on_release: app.goto("library")
+        source: app.icon_library
+        y: self.parent.y
+        x: self.parent.x
+        size: 64, 64
+
+    IconButton:
+        text: "Playing"
+        on_release: app.goto("play")
+        source: app.icon_playing
+        y: self.parent.y
+        x: self.parent.x
+        size: 64, 64
+
+    IconButton:
+        text: "Settings"
+        on_release: app.goto("settings")
+        source: app.icon_settings
+        y: self.parent.y
+        x: self.parent.x
+        size: 64, 64
+
+    IconButton:
+        text: "About"
+        on_release: app.goto("about")
+        source: app.icon_help
+        y: self.parent.y
+        x: self.parent.x
+        size: 64, 64
+
+    Button:
+        text: "Debug"
+        on_release: app.start_debug()
+
+<LoadDialog>:
+    BoxLayout:
+        size: root.size
+        pos: root.pos
+        orientation: "vertical"
+        FileChooserIconView:
+            id: filechooser
+
+        BoxLayout:
+            size_hint_y: None
+            height: 30
+            Button:
+                text: "Cancel"
+                on_release: app.cancel()
+
+            Button:
+                text: "Load"
+                on_release: app.on_load(filechooser.path, filechooser.selection)

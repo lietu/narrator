@@ -1,0 +1,5 @@
+windows/build
+windows/dist
+settings.json
+.idea
+*.pyc
