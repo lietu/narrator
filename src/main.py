@@ -235,8 +235,6 @@ class NarratorApp(App):
 
         self.load_settings()
 
-        print(self.active_book)
-        print(self.active_file)
         if self.active_book and self.active_file:
             path = self.books[self.active_book]["path"]
             fullpath = os.path.join(path, self.active_file)
@@ -256,7 +254,6 @@ class NarratorApp(App):
         return self.slider != None
 
     def goto(self, screen):
-        print("Switching to screen " + screen)
         self.root.current = screen
 
     def on_stop(self):
@@ -377,8 +374,6 @@ class NarratorApp(App):
         except IOError:
             pass
 
-        print("Loaded settings")
-
         for key in settings:
             setattr(self, key, settings[key])
 
@@ -392,8 +387,6 @@ class NarratorApp(App):
         for key in DEFAULT_SETTINGS:
             settings[key] = getattr(self, key, DEFAULT_SETTINGS[key])
 
-        print("Saving settings...")
-
         with open(SETTINGS_FILE, "w") as f:
             json.dump(settings, f, sort_keys=True,
                       indent=4, separators=(',', ': '))
@@ -402,7 +395,6 @@ class NarratorApp(App):
         self.file_loaded = False
         self.duration = -1
 
-        print("Loaded {}".format(path))
         sound = SoundLoader.load(path)
 
         if sound:
@@ -445,10 +437,6 @@ class NarratorApp(App):
             "images": images
         }
 
-        print("{}: {} sounds, {} images".format(
-            name, len(book["files"]), len(book["images"])
-        ))
-
         self.books[name] = book
 
     def update_book_list(self):
@@ -461,7 +449,6 @@ class NarratorApp(App):
 
     def seek(self, position):
         self.position = position
-        print("Seeking to position {}".format(position))
         self.sound.seek(position)
         self.update_position(position)
 
@@ -474,7 +461,6 @@ class NarratorApp(App):
         self.seek(pos)
 
     def on_sound_stop(self):
-        print("{} ended".format(self.active_file))
         self.next_file()
 
     def next_file(self):
@@ -517,7 +503,6 @@ class NarratorApp(App):
     def stop_playback(self):
         self.playing = False
         self.icon_play_pause = self.icon_play
-        print(self.icon_play_pause)
         self.position = 0
 
         if self.sound:
@@ -526,7 +511,6 @@ class NarratorApp(App):
     def pause_playback(self):
         self.playing = False
         self.icon_play_pause = self.icon_play
-        print(self.icon_play_pause)
 
         if self.sound:
             self.sound.player.pause()
@@ -537,7 +521,6 @@ class NarratorApp(App):
 
         self.playing = True
         self.icon_play_pause = self.icon_pause
-        print(self.icon_play_pause)
 
         self.sound.player.play()
 
@@ -554,10 +537,6 @@ class NarratorApp(App):
             self.pause_playback()
         else:
             self.play()
-
-    def start_debug(self):
-        import pdb
-        pdb.set_trace()
 
 
 Factory.register('IconButton', cls=IconButton)
