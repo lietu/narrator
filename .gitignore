@@ -3,3 +3,5 @@ windows/dist
 settings.json
 .idea
 *.pyc
+env
+bin

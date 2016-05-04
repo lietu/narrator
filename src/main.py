@@ -13,7 +13,7 @@ from kivy.clock import Clock
 from kivy import platform
 from widgets import AboutScreen, BookButton, BookList, IconButton, \
     LibraryScreen, LoadDialog, Menu, SettingsScreen
-from utils import get_icon, natcasecmp, seconds_to_text, SleepTimer
+from utils import get_icon, natcasecmp, seconds_to_text, SleepTimer, describe
 
 __version__ = "0.9.0"
 
@@ -119,8 +119,11 @@ class NarratorApp(App):
     _playing = False
     _popup = None
     _keyboard = None
+    _paused_at = None
+    _stopping = False
 
     def on_start(self):
+        print("Narrator starting up.")
         self.root.transition = Transition()
         self.sleep_timer = SleepTimer(self.sleep_timeout)
 
@@ -137,7 +140,12 @@ class NarratorApp(App):
 
         Clock.schedule_interval(self.update, 0.2)
 
+    def on_pause(self):
+        print("Narrator pausing.")
+        self.save_settings()
+
     def _request_keyboard(self):
+        print("Requesting keyboard.")
         self._keyboard = Window.request_keyboard(
             self._keyboard_closed,
             self
@@ -145,6 +153,7 @@ class NarratorApp(App):
         self._keyboard.bind(on_key_down=self._on_keyboard_down)
 
     def _keyboard_closed(self):
+        print("Keyboard was closed.")
         self._keyboard.unbind(on_key_down=self._on_keyboard_down)
         self._keyboard = None
 
@@ -194,16 +203,20 @@ class NarratorApp(App):
         return self._slider != None
 
     def goto(self, screen):
+        print("Switching to screen " + screen)
         self.root.current = screen
 
     def on_stop(self):
+        print("Narrator stopping.")
         self.save_settings()
 
     def cancel(self):
+        print("Cancel clicked")
         self.dismiss_popup()
 
     def dismiss_popup(self):
         if self._popup:
+            print("Closing scan popup")
             self._popup.dismiss()
             self._popup = None
 
@@ -214,6 +227,7 @@ class NarratorApp(App):
         self._popup.open()
 
     def select_book(self, book):
+        print("Selected book " + book.text)
         self.stop_playback()
 
         name = book.text
@@ -236,7 +250,7 @@ class NarratorApp(App):
 
     def update(self, _=None):
         if self._playing:
-            self.position = self._sound.player.get_position()
+            self.position = self._get_pos()
 
             self.update_duration()
 
@@ -304,10 +318,15 @@ class NarratorApp(App):
         self._slider.value = self.position
 
     def update_duration(self):
-        self.duration = self._sound.player.get_duration()
+        if getattr(self._sound, "_data", None):
+            self.duration = self._sound._data.get_length()
+        else:
+            self.duration = self._sound.player.get_duration()
         self.duration_text = seconds_to_text(self.duration)
 
     def load_settings(self):
+        print("Loading settings")
+
         settings = {}
         settings.update(DEFAULT_SETTINGS)
 
@@ -328,6 +347,7 @@ class NarratorApp(App):
         self.update_book_list()
 
     def save_settings(self):
+        print("Saving settings")
         settings = {}
         for key in DEFAULT_SETTINGS:
             settings[key] = getattr(self, key, DEFAULT_SETTINGS[key])
@@ -337,6 +357,7 @@ class NarratorApp(App):
                       indent=4, separators=(',', ': '))
 
     def load_file(self, path):
+        print("Loading sound file " + path)
         self._file_loaded = False
         self.duration = -1
 
@@ -346,6 +367,8 @@ class NarratorApp(App):
             self._sound = sound
             self._sound.on_stop = self.on_sound_stop
             self.active_file = os.path.basename(path)
+
+        # describe(sound)
 
         self.dismiss_popup()
 
@@ -358,6 +381,9 @@ class NarratorApp(App):
                 self.add_book_from_files(name, files)
         self.save_settings()
         self.update_book_list()
+        print("Scan completed, now have {} books".format(
+            len(self.book_list)
+        ))
 
     def add_book_from_files(self, path, files):
         name = os.path.basename(path)
@@ -393,6 +419,7 @@ class NarratorApp(App):
         self.seek(self._slider.value)
 
     def seek(self, position):
+        print("Seeking to {}".format(position))
         self.position = position
         self._sound.seek(position)
         self.update_position(position)
@@ -406,9 +433,14 @@ class NarratorApp(App):
         self.seek(pos)
 
     def on_sound_stop(self):
+        if self._stopping:
+            return
+
+        print("File ended")
         self.next_file()
 
     def next_file(self):
+        print("Going to next file")
         self.stop_playback()
 
         book = self.books[self.active_book]
@@ -425,9 +457,11 @@ class NarratorApp(App):
         self.update()
 
     def stop_book(self):
+        print("Stopping the book")
         self.stop_playback()
 
     def prev_file(self):
+        print("Loading previous file")
         if self.active_index == 0:
             self.seek(0)
             return
@@ -446,33 +480,42 @@ class NarratorApp(App):
         self.update()
 
     def stop_playback(self):
+        print("Stopping playback")
         self._playing = False
         self.icon_play_pause = self.icon_play
         self.position = 0
 
         if self._sound:
-            self._sound.player.stop()
+            self._stop()
 
     def pause_playback(self):
+        print("Pausing playback")
         self._playing = False
         self.icon_play_pause = self.icon_play
 
         if self._sound:
-            self._sound.player.pause()
+            self._pause()
 
     def play(self):
         if not self._sound:
             return
 
+        print("Playing sound file")
+
         self._playing = True
         self.icon_play_pause = self.icon_pause
 
-        self._sound.player.play()
+        self._play()
 
         if not self._file_loaded:
             self._file_loaded = True
             self.update_duration()
             self.seek(self.position)
+
+        if self._paused_at:
+            print("Continuing from {}".format(self._paused_at))            
+            self.seek(self._paused_at)
+            self._paused_at = None
 
     def pause_play(self):
         if not self._sound:
@@ -490,6 +533,42 @@ class NarratorApp(App):
     def to_window(self, x, y):
         return x, y
 
+    # Functions that take care of abstracting various platform
+    # differences.
+
+    def _stop(self):
+        # Stupid events getting triggered by stop
+        if self._stopping:
+            return
+
+        self._stopping = True
+
+        if getattr(self._sound, "stop", None):
+            self._sound.stop()
+        else:
+            self._sound.player.stop()
+
+        self._stopping = False
+
+    def _pause(self):
+        if getattr(self._sound, "player", None):
+            self._sound.player.pause()
+        else:
+            self._paused_at = self._get_pos()
+            print("Paused at {}".format(self._paused_at))
+            self._stop()
+            
+    def _play(self):
+        if getattr(self._sound, "play", None):
+            self._sound.play()
+        else:
+            self._sound.player.play()
+
+    def _get_pos(self):
+        if getattr(self._sound, "get_pos", None):
+            return self._sound.get_pos()
+        else:
+            return self._sound.player.get_position()
 
 if __name__ == '__main__':
     Factory.register('IconButton', cls=IconButton)

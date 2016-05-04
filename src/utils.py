@@ -1,5 +1,16 @@
 import os
 import time
+import inspect
+
+
+builtins = (
+    "float",
+    "int",
+    "str",
+    "unicode",
+    "bool",
+)
+
 
 
 def try_int(s):
@@ -59,6 +70,55 @@ def seconds_to_text(seconds):
     hours, minutes = divmod(minutes, 60)
 
     return "%d:%02d:%02d" % (hours, minutes, seconds)
+
+
+def describe(obj, level=0):
+    def print_key(key):
+        print("  " * level + " - " + key)
+
+    skip = ("imag", "real", "numerator", "denominator", "proxy_ref")
+
+    if isinstance(obj, dict):
+        for key in obj:
+            if key[:2] == "__" or key in skip:
+                continue
+
+            value = obj[key]
+
+            if getattr(value, "__class__", None) and value.__class__.__name__ not in builtins:
+                print_key(key + " -> ")
+
+                if level <= 3:
+                    describe(value, level+1)
+                else:
+                    print(("  " * (level + 2)) + str(value))
+            elif isinstance(value, dict):
+                print_key(key + ":")
+                describe(value, level+1)
+            else:
+                print_key(key + ": " + str(value))
+    else:
+        for key in dir(obj):
+            if key[:2] == "__" or key in skip:
+                continue
+
+            value = getattr(obj, key)
+            if hasattr(value, '__call__'):
+                args = "?"
+                if getattr(value, "func_code", None):
+                    args = ", ".join(value.func_code.co_varnames)
+                print_key(key + "(" + args + ")")
+            elif getattr(value, "__class__", None) and value.__class__.__name__ not in builtins:
+                print_key(key + " -> ")
+                if level <= 3:
+                    describe(value, level+1)
+                else:
+                    print(("  " * (level + 2)) + str(value))
+            elif isinstance(value, dict):
+                print_key(key + ":")
+                describe(value, level+1)
+            else:
+                print_key(key + ": " + str(value))
 
 
 class SleepTimer(object):
