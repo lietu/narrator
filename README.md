@@ -30,12 +30,12 @@ Tap on a book from the list to start listening to it.
 The controls should be fairly self-explanatory, but they have keyboard bindings
 for non-mobile users.
 
-`Space`: Play/Pause
-`Down arrow`: Back 30s
-`Left arrow`: Back 10s
-`Right arrow`: Forward 10s
-`Up arrow`: Forward 30s
-`Esc`: Quit
+ * `Space`: Play/Pause
+ * `Down arrow`: Back 30s
+ * `Left arrow`: Back 10s
+ * `Right arrow`: Forward 10s
+ * `Up arrow`: Forward 30s
+ * `Esc`: Quit
 
 
 ## Development
