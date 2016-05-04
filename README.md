@@ -4,6 +4,9 @@ Free open source cross-platform audiobook player software.
 
 ![Screenshot](playing.png?raw=true "Playing screen")
 
+A demo video of an early version is available at:
+[https://www.youtube.com/watch?v=BaNTT4RuA90](https://www.youtube.com/watch?v=BaNTT4RuA90)
+
 
 ## How to use it?
 
