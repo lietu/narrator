@@ -39,11 +39,12 @@ def natcasecmp(a, b):
 
 def get_icon(name):
     prefix = "ic_" + name + "_white_24dp"
-
     prefix = os.path.join("res", prefix)
+    prefix = os.path.join(prefix, "android")
+    prefix = os.path.join(prefix, "drawable-xxxhdpi")
 
-    path = os.path.join(os.path.join(prefix, "web"),
-                        "ic_" + name + "_white_24dp_2x.png")
+    path = os.path.join(prefix,
+                        "ic_" + name + "_white_24dp.png")
 
     if not os.path.exists(path):
         raise AttributeError("Could not find file {}".format(
