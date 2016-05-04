@@ -19,29 +19,29 @@ Root:
 
             Label:
                 text: app.active_book
-                font_size: 24
+                font_size: "24dp"
 
             BoxLayout:
                 orientation: "vertical"
                 size_hint_y: None
-                height: 72
+                height: "72dp"
                 Label:
                     text: app.file_label
 
                 Slider:
                     size_hint_y: None
-                    height: 48
+                    height: "48dp"
                     min: 0
                     max: app.duration
                     value: 0
 
                 BoxLayout:
                     size_hint_y: None
-                    height: 12
+                    height: "12dp"
 
                     AnchorLayout:
                         size_hint_x: None
-                        width: 50
+                        width: "50dp"
                         anchor_x: "left"
                         anchor_y: "top"
                         Label:
@@ -52,7 +52,7 @@ Root:
 
                     AnchorLayout:
                         size_hint_x: None
-                        width: 50
+                        width: "50dp"
                         anchor_x: "right"
                         anchor_y: "top"
                         Label:
@@ -60,7 +60,7 @@ Root:
 
             BoxLayout:
                 size_hint_y: None
-                height: 64
+                height: "64dp"
                 orientation: "horizontal"
 
                 BoxLayout:
@@ -70,7 +70,7 @@ Root:
                     source: app.icon_prev
                     y: self.parent.y
                     x: self.parent.x
-                    size: 64, 64
+                    size: "64dp", "64dp"
                     size_hint_x: None
 
                 IconButton:
@@ -78,7 +78,7 @@ Root:
                     source: app.icon_play_pause
                     y: self.parent.y
                     x: self.parent.x
-                    size: 64, 64
+                    size: "64dp", "64dp"
                     size_hint_x: None
 
                 IconButton:
@@ -86,14 +86,14 @@ Root:
                     source: app.icon_next
                     y: self.parent.y
                     x: self.parent.x
-                    size: 64, 64
+                    size: "64dp", "64dp"
                     size_hint_x: None
 
                 BoxLayout:
 
             BoxLayout:
                 size_hint_y: None
-                height: 64
+                height: "64dp"
                 orientation: "horizontal"
 
                 BoxLayout:
@@ -103,7 +103,7 @@ Root:
                     source: app.icon_r30
                     y: self.parent.y
                     x: self.parent.x
-                    size: 64, 64
+                    size: "64dp", "64dp"
                     size_hint_x: None
 
                 IconButton:
@@ -111,7 +111,7 @@ Root:
                     source: app.icon_r10
                     y: self.parent.y
                     x: self.parent.x
-                    size: 64, 64
+                    size: "64dp", "64dp"
                     size_hint_x: None
 
                 BoxLayout:
@@ -121,7 +121,7 @@ Root:
                     source: app.icon_f10
                     y: self.parent.y
                     x: self.parent.x
-                    size: 64, 64
+                    size: "64dp", "64dp"
                     size_hint_x: None
 
                 IconButton:
@@ -129,7 +129,7 @@ Root:
                     source: app.icon_f30
                     y: self.parent.y
                     x: self.parent.x
-                    size: 64, 64
+                    size: "64dp", "64dp"
                     size_hint_x: None
 
                 BoxLayout:
@@ -139,17 +139,17 @@ Root:
 
             BoxLayout:
                 size_hint_y: None
-                height: 64
+                height: "64dp"
                 orientation: "horizontal"
 
                 Image:
                     size_hint_x: None
-                    width: 64
+                    width: "64dp"
                     source: app.icon_snooze
 
                 Label:
                     size_hint_x: None
-                    width: 256
+                    width: "256dp"
                     text: app.sleep_text
 
                 BoxLayout:
@@ -157,7 +157,7 @@ Root:
 
         Menu:
             size_hint_y: None
-            height: 64
+            height: "64dp"
 
 <SettingsScreen>:
     name: "settings"
@@ -167,11 +167,11 @@ Root:
             text: "Settings"
         Menu:
             size_hint_y: None
-            height: 64
+            height: "64dp"
 
 <BookButton>:
     size_hint_y: None
-    height: 32
+    height: "32dp"
     on_press: app.select_book(*args)
 
 <BookList>:
@@ -187,16 +187,16 @@ Root:
         orientation: "vertical"
         Label:
             text: "Library"
-            font_size: 24
+            font_size: "24dp"
             size_hint_y: None
-            height: 48
+            height: "48dp"
 
         BookList:
 
         BoxLayout:
             orientation: "horizontal"
             size_hint_y: None
-            height: 64
+            height: "64dp"
 
             IconButton:
                 source: app.icon_search
@@ -207,7 +207,7 @@ Root:
 
         Menu:
             size_hint_y: None
-            height: 64
+            height: "64dp"
 
 
 <AboutScreen>:
@@ -218,14 +218,14 @@ Root:
             text: "About"
         Menu:
             size_hint_y: None
-            height: 64
+            height: "64dp"
 
 
 <Menu>:
     orientation: "horizontal"
     size_hint_y: None
     size_hint_x: 1
-    height: 64
+    height: "64dp"
 
     IconButton:
         text: "Library"
@@ -233,7 +233,7 @@ Root:
         source: app.icon_library
         y: self.parent.y
         x: self.parent.x
-        size: 64, 64
+        size: "64dp", "64dp"
 
     IconButton:
         text: "Playing"
@@ -241,7 +241,7 @@ Root:
         source: app.icon_playing
         y: self.parent.y
         x: self.parent.x
-        size: 64, 64
+        size: "64dp", "64dp"
 
     IconButton:
         text: "Settings"
@@ -249,7 +249,7 @@ Root:
         source: app.icon_settings
         y: self.parent.y
         x: self.parent.x
-        size: 64, 64
+        size: "64dp", "64dp"
 
     IconButton:
         text: "About"
@@ -257,7 +257,7 @@ Root:
         source: app.icon_help
         y: self.parent.y
         x: self.parent.x
-        size: 64, 64
+        size: "64dp", "64dp"
 
     #IconButton:
     #    text: "Debug"
@@ -265,7 +265,7 @@ Root:
     #    source: app.icon_help
     #    y: self.parent.y
     #    x: self.parent.x
-    #    size: 64, 64
+    #    size: "64dp", "64dp"
 
 <LoadDialog>:
     BoxLayout:
@@ -277,7 +277,7 @@ Root:
 
         BoxLayout:
             size_hint_y: None
-            height: 30
+            height: "30dp"
             Button:
                 text: "Cancel"
                 on_release: app.cancel()
