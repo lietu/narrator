@@ -63,12 +63,15 @@ Root:
                 height: 64
                 orientation: "horizontal"
 
+                BoxLayout:
+
                 IconButton:
                     on_release: app.prev_file()
                     source: app.icon_prev
                     y: self.parent.y
                     x: self.parent.x
                     size: 64, 64
+                    size_hint_x: None
 
                 IconButton:
                     on_release: app.pause_play()
@@ -76,6 +79,7 @@ Root:
                     y: self.parent.y
                     x: self.parent.x
                     size: 64, 64
+                    size_hint_x: None
 
                 IconButton:
                     on_release: app.next_file()
@@ -83,11 +87,16 @@ Root:
                     y: self.parent.y
                     x: self.parent.x
                     size: 64, 64
+                    size_hint_x: None
+
+                BoxLayout:
 
             BoxLayout:
                 size_hint_y: None
                 height: 64
                 orientation: "horizontal"
+
+                BoxLayout:
 
                 IconButton:
                     on_release: app.seek_backward(30)
@@ -95,6 +104,7 @@ Root:
                     y: self.parent.y
                     x: self.parent.x
                     size: 64, 64
+                    size_hint_x: None
 
                 IconButton:
                     on_release: app.seek_backward(10)
@@ -102,6 +112,9 @@ Root:
                     y: self.parent.y
                     x: self.parent.x
                     size: 64, 64
+                    size_hint_x: None
+
+                BoxLayout:
 
                 IconButton:
                     on_release: app.seek_forward(10)
@@ -109,6 +122,7 @@ Root:
                     y: self.parent.y
                     x: self.parent.x
                     size: 64, 64
+                    size_hint_x: None
 
                 IconButton:
                     on_release: app.seek_forward(30)
@@ -116,6 +130,9 @@ Root:
                     y: self.parent.y
                     x: self.parent.x
                     size: 64, 64
+                    size_hint_x: None
+
+                BoxLayout:
 
             BoxLayout:
                 size_hint_x: None
@@ -241,6 +258,14 @@ Root:
         y: self.parent.y
         x: self.parent.x
         size: 64, 64
+
+    #IconButton:
+    #    text: "Debug"
+    #    on_release: app.start_debug()
+    #    source: app.icon_help
+    #    y: self.parent.y
+    #    x: self.parent.x
+    #    size: 64, 64
 
 <LoadDialog>:
     BoxLayout:

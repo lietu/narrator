@@ -1,21 +1,19 @@
 import json
 import os
-import time
 from kivy.app import App
-from kivy.uix.floatlayout import FloatLayout
-from kivy.uix.boxlayout import BoxLayout
-from kivy.uix.image import Image
-from kivy.uix.behaviors import ButtonBehavior
 from kivy.uix.screenmanager import ScreenManager, Screen, \
     WipeTransition as Transition
-from kivy.uix.listview import ListItemButton, ListView
 from kivy.factory import Factory
 from kivy.properties import ObjectProperty, NumericProperty, ListProperty, \
     StringProperty
 from kivy.uix.popup import Popup
+from kivy.core.window import Window
 from kivy.core.audio import SoundLoader
 from kivy.clock import Clock
 from kivy import platform
+from widgets import AboutScreen, BookButton, BookList, IconButton, \
+    LibraryScreen, LoadDialog, Menu, SettingsScreen
+from utils import get_icon, natcasecmp, seconds_to_text, SleepTimer
 
 __version__ = "0.9.0"
 
@@ -30,114 +28,6 @@ DEFAULT_SETTINGS = {
     "sleep_timeout": 60.0 * 30,
     "books": {},
 }
-
-
-def try_int(s):
-    "Convert to integer if possible."
-    try:
-        return int(s)
-    except:
-        return s
-
-
-def natsort_key(s):
-    "Used internally to get a tuple by which s is sorted."
-    import re
-    return map(try_int, re.findall(r'(\d+|\D+)', s))
-
-
-def natcmp(a, b):
-    "Natural string comparison, case sensitive."
-    return cmp(natsort_key(a), natsort_key(b))
-
-
-def natcasecmp(a, b):
-    "Natural string comparison, ignores case."
-    return natcmp(a.lower(), b.lower())
-
-
-class BookButton(ListItemButton):
-    pass
-
-
-class BookList(ListView):
-    pass
-
-
-def get_icon(name):
-    prefix = "ic_" + name + "_white_24dp"
-
-    prefix = os.path.join("res", prefix)
-
-    path = os.path.join(os.path.join(prefix, "web"),
-                        "ic_" + name + "_white_24dp_2x.png")
-
-    if not os.path.exists(path):
-        raise AttributeError("Could not find file {}".format(
-            path)
-        )
-
-    return path
-
-    # if platform in ('windows', 'linux', 'macosx', 'unknown'):
-    #     path = os.path.join(prefix, "web")
-    #     return os.path.join(path, name + "_24d_x2.png")
-    # elif platform == "android":
-    #     path = os.path.join(os.path.join(prefix, "android"),
-    #                         "drawable-xxxhdpi")
-    #     return os.path.join(path, name + "_24d.png")
-    # elif platform == "ios":
-    #     path = os.path.join(os.path.join(prefix, "ios"),
-    #                         "ic_fast_forward.imageset")
-    #     return os.path.join(path, name + "_3x.png")
-
-
-def seconds_to_text(seconds):
-    minutes, seconds = divmod(seconds, 60)
-    hours, minutes = divmod(minutes, 60)
-
-    return "%d:%02d:%02d" % (hours, minutes, seconds)
-
-
-class SleepTimer(object):
-    def __init__(self, timeout):
-        self.timeout = timeout
-        self.remaining = timeout
-        self.start = 0
-
-        self.update_start()
-        self.update()
-
-    def update(self):
-        self.remaining = self.timeout - (time.time() - self.start)
-
-    def update_start(self):
-        self.start = time.time()
-
-
-class Menu(BoxLayout):
-    pass
-
-
-class IconButton(ButtonBehavior, Image):
-    pass
-
-
-class SettingsScreen(Screen):
-    pass
-
-
-class LibraryScreen(Screen):
-    pass
-
-
-class AboutScreen(Screen):
-    pass
-
-
-class LoadDialog(FloatLayout):
-    load = ObjectProperty(None)
-    cancel = ObjectProperty(None)
 
 
 class Root(ScreenManager):
@@ -156,7 +46,7 @@ class PlayScreen(Screen):
 
     def on_touch_down(self, touch):
         app.skip_slider_updates = True
-        self.slider_value = app.slider.value
+        self.slider_value = app._slider.value
         app.sleep_timer.update_start()
 
         super(PlayScreen, self).on_touch_down(touch)
@@ -165,15 +55,15 @@ class PlayScreen(Screen):
         super(PlayScreen, self).on_touch_move(touch)
         app.sleep_timer.update_start()
 
-        if self.slider_value != app.slider.value:
+        if self.slider_value != app._slider.value:
             app.skip_position_updates = True
-            app.update_position(app.slider.value)
+            app.update_position(app._slider.value)
 
     def on_touch_up(self, touch):
         super(PlayScreen, self).on_touch_up(touch)
 
         # User moved the slider
-        if app.slider.value != self.slider_value:
+        if app._slider.value != self.slider_value:
             app.seek_to_slider()
 
         app.skip_slider_updates = False
@@ -190,7 +80,7 @@ class NarratorApp(App):
     position = NumericProperty(0.0)
     duration = NumericProperty(0.0)
     books = {}
-    book_list = ListProperty([])
+    book_list = ListProperty()
     sleep_timeout = NumericProperty(60.0)
 
     # Other widget Properties
@@ -202,7 +92,6 @@ class NarratorApp(App):
     icon_pause = ObjectProperty(get_icon("pause"))
     icon_play = ObjectProperty(get_icon("play_arrow"))
     icon_playing = ObjectProperty(get_icon("playlist_play"))
-    icon_help = ObjectProperty(get_icon("help"))
     icon_search = ObjectProperty(get_icon("search"))
     icon_rr = ObjectProperty(get_icon("fast_rewind"))
     icon_r10 = ObjectProperty(get_icon("replay_10"))
@@ -218,16 +107,18 @@ class NarratorApp(App):
     duration_text = ObjectProperty("0:00:00")
     position_text = ObjectProperty("0:00:00")
 
+    x, y = 0, 0
+
     # Runtime variables
-    file_loaded = False
-    slider = None
-    sound = None
-    playing = False
-    prev_position = 0
     skip_slider_updates = False
     skip_position_updates = False
     sleep_timer = None
-    popup = None
+    _file_loaded = False
+    _slider = None
+    _sound = None
+    _playing = False
+    _popup = None
+    _keyboard = None
 
     def on_start(self):
         self.root.transition = Transition()
@@ -246,12 +137,61 @@ class NarratorApp(App):
 
         Clock.schedule_interval(self.update, 0.2)
 
+    def _request_keyboard(self):
+        self._keyboard = Window.request_keyboard(
+            self._keyboard_closed,
+            self
+        )
+        self._keyboard.bind(on_key_down=self._on_keyboard_down)
+
+    def _keyboard_closed(self):
+        self._keyboard.unbind(on_key_down=self._on_keyboard_down)
+        self._keyboard = None
+
+    def _on_keyboard_down(self, keyboard, keycode, text, modifiers):
+        """
+        Triggered every time you press a key on the keyboard. Resets sleep
+        timer and triggers some controls.
+        :param keyboard:
+        :param keycode:
+        :param text:
+        :param modifiers:
+        :return:
+        """
+
+        code, key = keycode
+
+        # Toggle pause/play when user presses space
+        if text == " ":
+            self.pause_play()
+
+        # Jump forward/back with arrows
+        if key == "down":
+            self.seek_backward(30)
+        if key == "left":
+            self.seek_backward(10)
+        if key == "right":
+            self.seek_forward(10)
+        if key == "up":
+            self.seek_forward(30)
+
+        self.sleep_timer.update_start()
+
+    def on_mouse_pos(self, *args):
+        """
+        Triggered every time there's a mouse event. Resets sleep timer if you
+        touch the mouse.
+        :param args:
+        :return:
+        """
+        self.sleep_timer.update_start()
+
     def find_slider(self):
         for w in self.root.walk(True):
             if w.__class__.__name__ == "Slider":
-                self.slider = w
+                self._slider = w
 
-        return self.slider != None
+        return self._slider != None
 
     def goto(self, screen):
         self.root.current = screen
@@ -263,15 +203,15 @@ class NarratorApp(App):
         self.dismiss_popup()
 
     def dismiss_popup(self):
-        if self.popup:
-            self.popup.dismiss()
-            self.popup = None
+        if self._popup:
+            self._popup.dismiss()
+            self._popup = None
 
     def show_load(self):
         content = LoadDialog(load=self.on_load, cancel=self.dismiss_popup)
-        self.popup = Popup(title="Select folder to scan", content=content,
-                           size_hint=(0.9, 0.9))
-        self.popup.open()
+        self._popup = Popup(title="Select folder to scan", content=content,
+                            size_hint=(0.9, 0.9))
+        self._popup.open()
 
     def select_book(self, book):
         self.stop_playback()
@@ -295,8 +235,8 @@ class NarratorApp(App):
         self.dismiss_popup()
 
     def update(self, _=None):
-        if self.playing:
-            self.position = self.sound.player.get_position()
+        if self._playing:
+            self.position = self._sound.player.get_position()
 
             self.update_duration()
 
@@ -315,8 +255,14 @@ class NarratorApp(App):
                 name=self.active_file
             )
 
+        if str(platform) in ('win', 'linux', 'macosx',):
+            if not self._keyboard:
+                self._request_keyboard()
+
+            Window.bind(mouse_pos=self.on_mouse_pos)
+
     def update_sleep(self):
-        if self.playing:
+        if self._playing:
             self.sleep_timer.update()
 
             if self.sleep_timer.remaining <= 0:
@@ -351,15 +297,14 @@ class NarratorApp(App):
         self.position_text = seconds_to_text(value)
 
     def update_slider(self):
-        if not self.slider:
+        if not self._slider:
             if not self.find_slider():
                 return
 
-        self.slider.value = self.position
-        self.prev_position = self.position
+        self._slider.value = self.position
 
     def update_duration(self):
-        self.duration = self.sound.player.get_duration()
+        self.duration = self._sound.player.get_duration()
         self.duration_text = seconds_to_text(self.duration)
 
     def load_settings(self):
@@ -392,14 +337,14 @@ class NarratorApp(App):
                       indent=4, separators=(',', ': '))
 
     def load_file(self, path):
-        self.file_loaded = False
+        self._file_loaded = False
         self.duration = -1
 
         sound = SoundLoader.load(path)
 
         if sound:
-            self.sound = sound
-            self.sound.on_stop = self.on_sound_stop
+            self._sound = sound
+            self._sound.on_stop = self.on_sound_stop
             self.active_file = os.path.basename(path)
 
         self.dismiss_popup()
@@ -445,11 +390,11 @@ class NarratorApp(App):
         self.book_list = items
 
     def seek_to_slider(self):
-        self.seek(self.slider.value)
+        self.seek(self._slider.value)
 
     def seek(self, position):
         self.position = position
-        self.sound.seek(position)
+        self._sound.seek(position)
         self.update_position(position)
 
     def seek_backward(self, jump):
@@ -501,55 +446,62 @@ class NarratorApp(App):
         self.update()
 
     def stop_playback(self):
-        self.playing = False
+        self._playing = False
         self.icon_play_pause = self.icon_play
         self.position = 0
 
-        if self.sound:
-            self.sound.player.stop()
+        if self._sound:
+            self._sound.player.stop()
 
     def pause_playback(self):
-        self.playing = False
+        self._playing = False
         self.icon_play_pause = self.icon_play
 
-        if self.sound:
-            self.sound.player.pause()
+        if self._sound:
+            self._sound.player.pause()
 
     def play(self):
-        if not self.sound:
+        if not self._sound:
             return
 
-        self.playing = True
+        self._playing = True
         self.icon_play_pause = self.icon_pause
 
-        self.sound.player.play()
+        self._sound.player.play()
 
-        if not self.file_loaded:
-            self.file_loaded = True
+        if not self._file_loaded:
+            self._file_loaded = True
             self.update_duration()
             self.seek(self.position)
 
     def pause_play(self):
-        if not self.sound:
+        if not self._sound:
             return
 
-        if self.playing:
+        if self._playing:
             self.pause_playback()
         else:
             self.play()
 
+    def start_debug(self):
+        import pdb
+        pdb.set_trace()
 
-Factory.register('IconButton', cls=IconButton)
-Factory.register('Root', cls=Root)
-Factory.register('Menu', cls=Menu)
-Factory.register('LoadDialog', cls=LoadDialog)
-Factory.register('LibraryScreen', cls=LibraryScreen)
-Factory.register('SettingsScreen', cls=SettingsScreen)
-Factory.register('PlayScreen', cls=PlayScreen)
-Factory.register('AboutScreen', cls=AboutScreen)
-Factory.register('BookList', cls=BookList)
-Factory.register('BookButton', cls=BookButton)
+    def to_window(self, x, y):
+        return x, y
+
 
 if __name__ == '__main__':
+    Factory.register('IconButton', cls=IconButton)
+    Factory.register('Root', cls=Root)
+    Factory.register('Menu', cls=Menu)
+    Factory.register('LoadDialog', cls=LoadDialog)
+    Factory.register('LibraryScreen', cls=LibraryScreen)
+    Factory.register('SettingsScreen', cls=SettingsScreen)
+    Factory.register('PlayScreen', cls=PlayScreen)
+    Factory.register('AboutScreen', cls=AboutScreen)
+    Factory.register('BookList', cls=BookList)
+    Factory.register('BookButton', cls=BookButton)
+
     app = NarratorApp()
     app.run()
