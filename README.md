@@ -82,4 +82,3 @@ https://design.google.com/icons/
 
 The source is provided with the MIT and new BSD licenses, more details in
 `LICENSE.md`.
-

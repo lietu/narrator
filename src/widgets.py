@@ -3,7 +3,6 @@ from kivy.uix.boxlayout import BoxLayout
 from kivy.uix.image import Image
 from kivy.uix.behaviors import ButtonBehavior
 from kivy.uix.listview import ListItemButton, ListView
-from kivy.uix.screenmanager import Screen
 from kivy.properties import ObjectProperty
 
 
@@ -20,18 +19,6 @@ class Menu(BoxLayout):
 
 
 class IconButton(ButtonBehavior, Image):
-    pass
-
-
-class SettingsScreen(Screen):
-    pass
-
-
-class LibraryScreen(Screen):
-    pass
-
-
-class AboutScreen(Screen):
     pass
 
 

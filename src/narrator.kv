@@ -5,9 +5,41 @@
 Root:
     orientation: "vertical"
     LibraryScreen:
+        id: library
     PlayScreen:
+        id: play
     SettingsScreen:
+        id: settings
     AboutScreen:
+        id: about
+
+<LibraryScreen>:
+    name: "library"
+    BoxLayout:
+        orientation: "vertical"
+        Label:
+            text: "Library"
+            font_size: "24dp"
+            size_hint_y: None
+            height: "48dp"
+
+        BookList:
+
+        BoxLayout:
+            orientation: "horizontal"
+            size_hint_y: None
+            height: "64dp"
+
+            IconButton:
+                source: app.icon_search
+                on_release: app.show_load()
+            Button:
+                text: "Scan for new books"
+                on_release: app.show_load()
+
+        Menu:
+            size_hint_y: None
+            height: "64dp"
 
 <PlayScreen>:
     name: "play"
@@ -29,6 +61,7 @@ Root:
                     text: app.file_label
 
                 Slider:
+                    id: position
                     size_hint_y: None
                     height: "48dp"
                     min: 0
@@ -165,6 +198,34 @@ Root:
         orientation: "vertical"
         Label:
             text: "Settings"
+            font_size: "24dp"
+            size_hint_y: None
+            height: "48dp"
+        BoxLayout:
+
+        BoxLayout:
+            orientation: "vertical"
+
+            Slider:
+                id: sleep_timer_slider
+                min: 5
+                max: 180
+                step: 5
+                value: app.sleep_timer_minutes
+
+            Label:
+                text: app.sleep_timer_setting_text
+
+        BoxLayout:
+
+        Button:
+            text: "Remove all books from library"
+            on_release: app.clear_library()
+            size_hint_y: None
+            height: "32dp"
+
+        BoxLayout:
+
         Menu:
             size_hint_y: None
             height: "64dp"
@@ -181,41 +242,30 @@ Root:
         allow_empty_selection=True,
         cls=BookButton)
 
-<LibraryScreen>:
-    name: "library"
-    BoxLayout:
-        orientation: "vertical"
-        Label:
-            text: "Library"
-            font_size: "24dp"
-            size_hint_y: None
-            height: "48dp"
-
-        BookList:
-
-        BoxLayout:
-            orientation: "horizontal"
-            size_hint_y: None
-            height: "64dp"
-
-            IconButton:
-                source: app.icon_search
-                on_release: app.show_load()
-            Button:
-                text: "Scan for new books"
-                on_release: app.show_load()
-
-        Menu:
-            size_hint_y: None
-            height: "64dp"
-
 
 <AboutScreen>:
+    id: about
     name: "about"
     BoxLayout:
         orientation: "vertical"
         Label:
-            text: "About"
+            text: "About Narrator"
+            font_size: "24dp"
+            size_hint_y: None
+            height: "48dp"
+
+        Label:
+            text: "Narrator is a free open source cross-platform audiobook player by Lietu. Material design icons by Google with the CC BY 4.0 license."
+            text_size: about.width, about.height / 3
+            padding_x: 16
+
+        Label:
+            text: "You can check out the source code and report issues at https://github.com/lietu/narrator"
+            text_size: about.width, about.height / 3
+            valign: "bottom"
+            padding_x: 16
+
+        BoxLayout:
         Menu:
             size_hint_y: None
             height: "64dp"
