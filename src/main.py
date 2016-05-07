@@ -16,7 +16,7 @@ from widgets import BookButton, BookList, IconButton, \
 from time import time
 from utils import get_icon, natcasecmp, seconds_to_text, SleepTimer, describe
 
-__version__ = "0.9.0"
+__version__ = "0.9.1"
 
 SETTINGS_FILE = "settings.json"
 

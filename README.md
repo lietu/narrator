@@ -8,6 +8,14 @@ A demo video of an early version is available at:
 [https://www.youtube.com/watch?v=BaNTT4RuA90](https://www.youtube.com/watch?v=BaNTT4RuA90)
 
 
+## Status
+
+Most of the core features are there, still having some issues getting everything working
+on some of the platforms. Windows seems to work pretty much flawlessly, Linux has issues
+with MP3 files for some reason, Android is buggy and missing some features. Mac OS X
+has not yet been tested.
+
+
 ## How to use it?
 
 Assuming you can find a binary from the [Releases](https://github.com/lietu/narrator/releases), you should start with downloading the app. If
